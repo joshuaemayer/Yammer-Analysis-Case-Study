@@ -1,0 +1,59 @@
+# Case Study from Mode Analytics: "Yammer Analysis: Drop in User Engagement"
+
+Author:	 Josh Mayer
+Date:		April 17, 2017
+
+All data from: https://community.modeanalytics.com/sql/tutorial/a-drop-in-user-engagement/
+
+# SQL Queries Used
+
+SQL Code:
+
+-- Engagement event counts by week
+SELECT DATE_TRUNC('week', occurred_at) as week_date, count(event_name)
+FROM tutorial.yammer_events events 
+WHERE event_type = 'engagement'
+GROUP BY DATE_TRUNC('week', occurred_at)
+ORDER BY DATE_TRUNC('week', occurred_at) asc
+
+-- Understanding the total Pending vs Active User Count 
+SELECT state, count(user_id) as User_Count
+FROM tutorial.yammer_users 
+GROUP BY state
+ORDER BY count(user_id) desc
+
+-- Confirming that engagement events only arise from active users
+SELECT events.location, count(users.user_id)
+FROM tutorial.yammer_events events 
+JOIN tutorial.yammer_users users
+ON events.user_id = users.user_id
+WHERE state = 'active' AND event_type = 'engagement'
+GROUP BY location
+ORDER BY count(users.user_id) desc
+LIMIT 10
+
+-- Email Open Action count by Week
+SELECT DATE_TRUNC('week', occurred_at) as week_date, count(user_id) as user_actions
+FROM tutorial.yammer_emails emails
+WHERE action = 'email_open'
+GROUP BY DATE_TRUNC('week', occurred_at)
+ORDER BY DATE_TRUNC('week', occurred_at) asc
+
+-- User Action by Week
+SELECT DATE_TRUNC('week', occurred_at) as week_date, action, count(user_id) as user_actions
+FROM tutorial.yammer_emails emails
+GROUP BY DATE_TRUNC('week', occurred_at), action
+ORDER BY DATE_TRUNC('week', occurred_at) asc
+
+-- Event Type by Week
+SELECT DATE_TRUNC('week', occurred_at) as week_date, event_name, count(user_id)
+FROM tutorial.yammer_events events
+WHERE event_type = 'engagement' 
+GROUP BY DATE_TRUNC('week', occurred_at), event_name
+ORDER BY DATE_TRUNC('week', occurred_at) asc
+
+-- Events by Device Type by Week
+SELECT DATE_TRUNC('week', occurred_at) as week_date, device, count(user_id) 
+FROM tutorial.yammer_events events
+GROUP BY DATE_TRUNC('week', occurred_at), device 
+ORDER BY DATE_TRUNC('week', occurred_at) asc
